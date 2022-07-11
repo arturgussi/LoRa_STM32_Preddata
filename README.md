@@ -1,5 +1,12 @@
 LoRa STM32 Source Code
 ===============
+
+Alterações do código fonte original realizadas:
+* Adicionado leitura serial para o LubCos (mode = 7) e para OPCom (mode = 8)
+* Adicionado funções para converter valores decimais em "floating-point encode 16 bits"
+* Entradas digitais: PB6 (com interrupção), PB7 e PB3
+
+===============
 Source code for Dragino LoRa module base on STM32 Chip. 
 Support Products: [LoRaST](http://www.dragino.com/products/lora/item/127-lora-st.html), [LSN50](http://www.dragino.com/products/lora/item/128-lsn50.html).
 
