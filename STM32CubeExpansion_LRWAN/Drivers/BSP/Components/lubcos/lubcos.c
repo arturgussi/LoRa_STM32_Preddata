@@ -70,7 +70,46 @@ extern UART_HandleTypeDef UartHandle1;
 void lubcos_read_serial(lubcos_serial_reading_t *lubcos)
 {
 	uart1_IoInit();
-	at_lubcos_data_receive(lubcos, 1000);
+	
+
+	// Numero de parametros a serem buscados
+	#define numberOfParameters  5
+	
+	// Sequencia de strings a serem buscadas
+	const char *parameters[numberOfParameters];
+	parameters[0] = "Time";
+	parameters[1] = "AH";
+	parameters[2] = "PCBT";
+	parameters[3] = "RH";
+	parameters[4] = "T";
+	
+	// Roda funcao para encontrar os parametros, retorna na mesma ordemn que foi enviado
+	float r[numberOfParameters];
+	r[0] = 0xFFFFFFFF; // 32 bits convertion
+	r[1] = 0xFFFF;     // 16 bits convertion
+	r[2] = 0xFFFF;
+	r[3] = 0xFFFF;
+	r[4] = 0xFFFF;
+	
+	
+	// Tamanho de cada sequencia de strings a serem buscadas, na ordem
+	int parametersSizes[numberOfParameters] = {4,2,4,2,1};
+	
+	// Tempo de espera para chegar os dados por serial
+	uint16_t delayvalue = 1000;	
+
+	// Chama funcao de interrupcao
+	find_value(r, parameters, parametersSizes, numberOfParameters, delayvalue);
+	
+	
+	// Aloca os valores encontrados nas variaveis declarada na struct do lubcos
+	lubcos->horario							= r[0];
+	lubcos->umidade_absoluta		= r[1];
+	lubcos->temperatura_sensor	= r[2];
+	lubcos->umidade_relativa		= r[3];
+	lubcos->temperatura					= r[4];
+	
+	
 	uart1_IoDeInit();
 }
 
@@ -94,35 +133,3 @@ void uart1_init_lubcos(void)
   }
 }
 
-void lubcos_GPIO_INPUTS_IoInit(void)
-{
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	
-	GPIO_InitTypeDef GPIO_InitStruct1={0};
-	GPIO_InitTypeDef GPIO_InitStruct2={0};
-	GPIO_InitTypeDef GPIO_InitStruct3={0};
-
-	
-	//PB6
-	GPIO_InitStruct1.Pin = GPIO_PIN_6;
-	GPIO_InitStruct1.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct1.Pull = GPIO_PULLUP;
-  GPIO_InitStruct1.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_6, &GPIO_InitStruct1 );
-	
-	
-	//PB7
-	GPIO_InitStruct2.Pin = GPIO_PIN_7;
-	GPIO_InitStruct2.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct2.Pull = GPIO_PULLUP;
-  GPIO_InitStruct2.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_7, &GPIO_InitStruct2 );
-	
-	
-	//PB3
-	GPIO_InitStruct3.Pin = GPIO_PIN_3;
-	GPIO_InitStruct3.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct3.Pull = GPIO_PULLUP;
-  GPIO_InitStruct3.Speed = GPIO_SPEED_HIGH;
-  HW_GPIO_Init( GPIOB, GPIO_PIN_3, &GPIO_InitStruct3 );
-}
